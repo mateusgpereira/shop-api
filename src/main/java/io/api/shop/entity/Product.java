@@ -19,9 +19,10 @@ public class Product implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(nullable = false, length = 110)
+    @Column(nullable = false, length = 50)
     private String name;
     @Column(nullable = false, precision = 10, scale = 2)
     private Double price;
-
+    @Column(nullable = true, length = 150)
+    private String imageUrl;
 }
