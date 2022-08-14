@@ -60,10 +60,11 @@ class ProductServiceImplTest {
 
         assertNotNull(result);
         assertThat(result.getContent(), hasSize(2));
-        assertEquals(1L, result.getContent().get(0).getId());
-        assertEquals("product0", result.getContent().get(0).getName());
-        assertEquals(0.5, result.getContent().get(0).getPrice());
-        assertEquals(productBaseUrl + "product0", result.getContent().get(0).getImageUrl());
+        ProductDTO productZero = result.getContent().get(0);
+        assertEquals(1L, productZero.getId());
+        assertEquals("product0", productZero.getName());
+        assertEquals(0.5, productZero.getPrice());
+        assertEquals(productBaseUrl + "product0", productZero.getImageUrl());
 
         verify(productRepository, times(1)).findAll(pageable);
         verify(productMapper, times(2)).productToProductDTO(any(Product.class));
@@ -80,6 +81,43 @@ class ProductServiceImplTest {
         assertEquals(0, result.getTotalElements());
 
         verify(productRepository, times(1)).findAll(pageable);
+        verify(productMapper, never()).productToProductDTO(any(Product.class));
+    }
+
+    @Test
+    void shouldReturnTwoProductsWhenSearchByName() {
+        Pageable pageable = PageRequest.of(0, 25);
+        when(productRepository.findAllByNameContainsIgnoreCase("product", pageable))
+                .thenReturn(new PageImpl<>(generateProductList(2)));
+
+        Page<ProductDTO> result = productService.searchByName("product", 0, 25);
+
+        assertNotNull(result);
+        assertThat(result.getContent(), hasSize(2));
+        ProductDTO productOne = result.getContent().get(1);
+        assertEquals(2L, productOne.getId());
+        assertEquals("product1", productOne.getName());
+        assertEquals(1.5, productOne.getPrice());
+        assertEquals(productBaseUrl + "product1", productOne.getImageUrl());
+
+        verify(productRepository, times(1)).findAllByNameContainsIgnoreCase("product", pageable);
+        verify(productMapper, times(2)).productToProductDTO(any(Product.class));
+    }
+
+    @Test
+    void shouldReturnPageWithEmptyContentWhenSearchReturnNoResults() {
+        Pageable pageable = PageRequest.of(0, 25);
+        when(productRepository.findAllByNameContainsIgnoreCase("product", pageable))
+                .thenReturn(new PageImpl<>(new ArrayList<>()));
+
+        Page<ProductDTO> result = productService.searchByName("product",0, 25);
+
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertThat(result.getContent(), hasSize(0));
+
+        verify(productRepository, times(1))
+                .findAllByNameContainsIgnoreCase("product",pageable);
         verify(productMapper, never()).productToProductDTO(any(Product.class));
     }
 
@@ -106,7 +144,7 @@ class ProductServiceImplTest {
     void shouldThrowsProductNotFoundException() {
         when(productRepository.findById(500L)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class,() -> {
+        assertThrows(ProductNotFoundException.class, () -> {
             productService.get(500L);
         });
 
