@@ -7,6 +7,9 @@ import io.api.shop.mapper.ProductMapper;
 import io.api.shop.repository.ProductRepository;
 import io.api.shop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,10 +24,8 @@ public class ProductServiceImpl implements ProductService {
     ProductMapper productMapper;
 
     @Override
-    public List<ProductDTO> list() {
-        return productRepository.findAll().stream()
-                .map(product -> productMapper.productToProductDTO(product))
-                .toList();
+    public Page<ProductDTO> list(Integer page, Integer limit) {
+        return productRepository.findAll(PageRequest.of(page, limit)).map(productMapper::productToProductDTO);
     }
 
     @Override
@@ -32,6 +33,12 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.productToProductDTO(
                 productRepository.findById(id).orElseThrow(ProductNotFoundException::new)
         );
+    }
+
+    @Override
+    public Page<ProductDTO> searchByName(String name, Integer page, Integer limit) {
+        Pageable pageable = PageRequest.of(page, limit);
+        return productRepository.findAllByNameContainsIgnoreCase(name, pageable).map(productMapper::productToProductDTO);
     }
 
     @Override

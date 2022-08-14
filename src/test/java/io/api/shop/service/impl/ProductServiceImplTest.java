@@ -14,6 +14,10 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -48,31 +52,34 @@ class ProductServiceImplTest {
 
     @Test
     void shouldListTwoProducts() {
-        when(productRepository.findAll()).thenReturn(this.generateProductList(2));
+        Pageable pageable = PageRequest.of(0, 25);
+        when(productRepository.findAll(pageable))
+                .thenReturn(new PageImpl<>(generateProductList(2)));
 
-        List<ProductDTO> result = productService.list();
+        Page<ProductDTO> result = productService.list(0, 25);
 
         assertNotNull(result);
-        assertThat(result, hasSize(2));
-        assertEquals(1L, result.get(0).getId());
-        assertEquals("product0", result.get(0).getName());
-        assertEquals(0.5, result.get(0).getPrice());
-        assertEquals(productBaseUrl + "product0", result.get(0).getImageUrl());
+        assertThat(result.getContent(), hasSize(2));
+        assertEquals(1L, result.getContent().get(0).getId());
+        assertEquals("product0", result.getContent().get(0).getName());
+        assertEquals(0.5, result.getContent().get(0).getPrice());
+        assertEquals(productBaseUrl + "product0", result.getContent().get(0).getImageUrl());
 
-        verify(productRepository, times(1)).findAll();
+        verify(productRepository, times(1)).findAll(pageable);
         verify(productMapper, times(2)).productToProductDTO(any(Product.class));
     }
 
     @Test
     void shouldReturnEmptyWhenThereAreNoProducts() {
-        when(productRepository.findAll()).thenReturn(new ArrayList<>());
+        Pageable pageable = PageRequest.of(0, 25);
+        when(productRepository.findAll(pageable)).thenReturn(new PageImpl<>(new ArrayList<>()));
 
-        List<ProductDTO> result = productService.list();
+        Page<ProductDTO> result = productService.list(0, 25);
 
         assertNotNull(result);
-        assertThat(result, hasSize(0));
+        assertEquals(0, result.getTotalElements());
 
-        verify(productRepository, times(1)).findAll();
+        verify(productRepository, times(1)).findAll(pageable);
         verify(productMapper, never()).productToProductDTO(any(Product.class));
     }
 

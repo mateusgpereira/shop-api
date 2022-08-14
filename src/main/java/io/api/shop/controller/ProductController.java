@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -19,9 +18,16 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> list() {
-        List<ProductDTO> products = productService.list();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "25") Integer limit
+    ) {
+        if (name != null) {
+            return  ResponseEntity.ok(productService.searchByName(name, page, limit));
+        }
+
+        return ResponseEntity.ok(productService.list(page,limit));
     }
 
     @GetMapping("/{id}")
