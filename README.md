@@ -11,11 +11,27 @@ This is the backend api for the DEMO SHOP project.
 
 ## Build
 
-To build this application run the following command in the root directory of the project:
+To build this application follow these steps:  
+
+First clone the repo:
+```shell script
+git clone git@github.com:mateusgpereira/shop-api.git
+```  
+
+Then enter the project folder:  
+First clone the repo:
+```shell script
+cd shop-api
+```  
+
+And build the docker image:  
+
 
 ```shell script
 docker build . -t shop-api:latest
 ```  
+
+<br>  
 
 ## Tests
 
