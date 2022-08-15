@@ -7,7 +7,9 @@
 
 # Shop API
 
-This is the backend api for the DEMO SHOP project.
+This is the backend api for the DEMO SHOP project.  
+
+<br>  
 
 ## Build
 

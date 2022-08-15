@@ -14,7 +14,7 @@ services:
     ports:
       - "3306:3306"
 
-  myadmin:
+  pma:
     image: phpmyadmin/phpmyadmin
     container_name: pma
     environment:
@@ -22,13 +22,3 @@ services:
     restart: always
     ports:
       - "8089:80"
-
-  shopapp:
-    build: .
-    image: shop-api:latest
-    container_name: shop-api
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
