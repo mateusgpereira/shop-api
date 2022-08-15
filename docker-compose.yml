@@ -27,6 +27,7 @@ services:
     build: .
     image: shop-api:latest
     container_name: shop-api
+    restart: always
     ports:
       - "8080:8080"
     depends_on:
